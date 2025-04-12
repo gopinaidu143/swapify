@@ -196,11 +196,7 @@
     const onlineCount = document.getElementById("online-count");
     const onlineUsersList = document.getElementById("online-users-list");
 
-const chatSocket = new WebSocket(
-  (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
-  window.location.host +
-  '/ws/' + roomName + '/'
-);
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/' + roomName + '/');
 
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -284,14 +280,80 @@ const chatSocket = new WebSocket(
             });
             updateOnlineUsers(data.online_users);
         } else if (data.message) {
-            chatMessages.innerHTML += `<b>${data.username}</b>: ${data.message}<br>`;
-        } else if (data.file_url) {
-            if (data.is_image) {
-                chatMessages.innerHTML += `<b>${data.username}</b>: <img src="${data.file_url}" style="max-width: 200px;" /><br>`;
-            } else {
-                chatMessages.innerHTML += `<b>${data.username}</b>: <a href="${data.file_url}" download>${data.filename}</a><br>`;
-            }
-        }
+    const messageHTML = `
+        <div class="thread">
+            <div class="thread__top">
+                <div class="thread__author">
+                    <a href="/profile/${data.user_id || '#'}/" class="thread__authorInfo">
+                        <div class="avatar avatar--small active">
+                            <img src="${data.avatar_url || '/static/images/avatar.svg'}" />
+                        </div>
+                        <span>@${data.username}</span>
+                    </a>
+                    <span class="thread__date">just now</span>
+                </div>
+            </div>
+            <div class="thread__details">
+                <p>${data.message}</p>
+            </div>
+        </div>
+    `;
+    chatMessages.innerHTML += messageHTML;
+}
+else if (data.file_url) {
+    let fileHTML = '';
+
+    if (data.is_image) {
+        fileHTML = `
+            <div class="thread">
+                <div class="thread__top">
+                    <div class="thread__author">
+                        <a href="/profile/${data.user_id || '#'}/" class="thread__authorInfo">
+                            <div class="avatar avatar--small active">
+                                <img src="${data.avatar_url || '/static/images/avatar.svg'}" />
+                            </div>
+                            <span>@${data.username}</span>
+                        </a>
+                        <span class="thread__date">just now</span>
+                    </div>
+                </div>
+                <div class="thread__details">
+                    <img src="${data.file_url}" class="chat-image" />
+                </div>
+            </div>
+        `;
+    } else {
+        fileHTML = `
+            <div class="thread">
+                <div class="thread__top">
+                    <div class="thread__author">
+                        <a href="/profile/${data.user_id || '#'}/" class="thread__authorInfo">
+                            <div class="avatar avatar--small active">
+                                <img src="${data.avatar_url || '/static/images/avatar.svg'}" />
+                            </div>
+                            <span>@${data.username}</span>
+                        </a>
+                        <span class="thread__date">just now</span>
+                    </div>
+                </div>
+                <div class="thread__details">
+                    <a href="${data.file_url}" download class="file-download">${data.filename}</a>
+                </div>
+            </div>
+        `;
+    }
+
+    chatMessages.innerHTML += fileHTML;
+}
+
+
+//  else if (data.file_url) {
+//             if (data.is_image) {
+//                 chatMessages.innerHTML += `<b>${data.username}</b>: <img src="${data.file_url}" style="max-width: 200px;" /><br>`;
+//             } else {
+//                 chatMessages.innerHTML += `<b>${data.username}</b>: <a href="${data.file_url}" download>${data.filename}</a><br>`;
+//             }
+//         }
 
         scrollToBottom();
     };
