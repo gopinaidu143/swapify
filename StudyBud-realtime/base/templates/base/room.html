@@ -196,7 +196,11 @@
     const onlineCount = document.getElementById("online-count");
     const onlineUsersList = document.getElementById("online-users-list");
 
-    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/' + roomName + '/');
+const chatSocket = new WebSocket(
+  (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+  window.location.host +
+  '/ws/' + roomName + '/'
+);
 
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
