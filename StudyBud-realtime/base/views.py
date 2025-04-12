@@ -329,7 +329,7 @@ def stop_meeting(request, room_id):
     if request.user == room.host:
         room.room_video_call_id = None  # Clear meeting ID
         room.save()
-        return JsonResponse({"success": True})
+        return redirect("room", pk=room_id)
     
     return JsonResponse({"success": False, "error": "You are not authorized!"}, status=403)
 

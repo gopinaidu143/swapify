@@ -20,7 +20,7 @@
         </div>
     </div>
     <div class="roomListRoom__content">
-        <a href="{% if request.user.is_authenticated %}{% url 'room' room.id %}?username={{ request.user.username }}&room_name={{ room.name }}{% else %}#{% endif %}">
+        <a href="{% if request.user.is_authenticated %}{% url 'room' room.id %}?username={{ request.user.username }}&room_name={{ room.name }}{% else %}{% url 'login' %}{% endif %}">
             {{ room.name }}
         </a>
         

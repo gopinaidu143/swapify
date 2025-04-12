@@ -6,125 +6,152 @@
   <div class="container">
     <!-- Room Start -->
     <div class="room">
-      <div class="room__top">
-        <div class="room__topLeft">
-          <a href="{% url 'home' %}">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>arrow-left</title>
-              <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"></path>
-            </svg>
-          </a>
-          <h3>Study Room</h3>
-        </div>
-        {% if room.host == request.user %}
-    <div class="room__topRight">
-        <a href="{% url 'update-room' room.id %}">Update</a>
-        <a href="{% url 'delete-room' room.id %}">Delete</a>
-            {% if room.room_video_call_id %}
-                <button id="stopMeetingBtn" class="btn btn-danger">Stop Meeting</button>
-                <a href="{% url 'join-meeting' room.id %}" id="joinMeetingBtn" class="btn btn-success">Join Now</a>
-
-            {% else %}
-                <a href="{% url 'start-meeting' room.id %}" class="btn btn-primary">Start Meeting</a>
-              {% endif %}
-    </div>
-      {% else %}
-          <div class="room__topRight">
-              {% if room.room_video_call_id %}
-              <a href="{% url 'join-meeting' room.id %}" id="joinMeetingBtn" class="btn btn-success">Join Now</a>
-              {% else %}
-                  <button class="btn btn-secondary" disabled>Meeting Not Live</button>
-              {% endif %}
-          </div>
-      {% endif %}
-
-      </div>
-
-      <div class="room__box scroll">
-        <div class="room__header scroll">
-          <div class="room__info">
-            <h3>{{room.name}}</h3>
-            <span>{{room.created|timesince}} ago</span>
-          </div>
-          <div class="room__hosted">
-            <p>Hosted By</p>
-            <a href="{% url 'user-profile' room.host.id %}" class="room__author">
-              <div class="avatar avatar--small">
-                <img src="{{room.host.avatar.url}}" />
-              </div>
-              <span>@{{room.host.username}}</span>
-            </a>
-          </div>
-            <div>
-              <h3 id="online-count">Online Users: 0</h3>
-              <ul id="online-users-list"></ul>
-          </div>
-         
-          <span class="room__topics">{{room.topic}}</span>
-         </div>
-
-                  <div class="room__conversation">
-                    <div class="threads scroll">
-                      <div id="chat-messages" style="max-height: 300px; overflow-y: scroll;">
-                        {% for message in room_messages %}
-                            <div class="thread">
-                                <div class="thread__top">
-                                    <div class="thread__author">
-                                        <a href="{% url 'user-profile' message.user.id %}" class="thread__authorInfo">
-                                            <div class="avatar avatar--small">
-                                                <img src="{{ message.user.avatar.url }}" />
-                                            </div>
-                                            <span>@{{ message.user.username }}</span>
-                                        </a>
-                                        <span class="thread__date">{{ message.created|timesince }} ago</span>
-                                    </div>
-
-                                    {% if request.user == message.user %}
-                                    <a href="{% url 'delete-message' message.id %}">
-                                        <div class="thread__delete">
-                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                                                <title>remove</title>
-                                                <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"></path>
-                                            </svg>
-                                        </div>
-                                    </a>
-                                    {% endif %}
-                                </div>
-
-                                <div class="thread__details">
-                                    {% if message.body %}
-                                    <p>{{ message.body }}</p>
-                                    {% elif message.file %}
-                                    <div class="file-message">
-                                        {% if message.is_image %}
-                                        <img src="{{ message.file.url }}" class="chat-image"/>
-                                        {% else %}
-                                        <a href="{{ message.file.url }}" download class="file-download">{{ message.filename }}</a>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                   {% endfor %}
+        <div class="room__container">
+            <div class="room__top">
+                <div class="room__topLeft">
+                  <a href="{% url 'home' %}">
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                      <title>arrow-left</title>
+                      <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"></path>
+                    </svg>
+                  </a>
+                  <h3 style="color: white;">Study Room</h3>
+                </div>
+              
+                <div>
+                  <h3 id="online-count" style="color: white;">Online 0</h3>
+                  <ul id="online-users-list"></ul>
+                </div>
+              
+                {% if room.host == request.user %}
+                <div class="room__topRight">
+                  <div class="dropdown">
+                    <button class="dropbtn">Options &#9662;</button>
+                    <div class="dropdown-content">
+                      <div class="room_delete_update">
+                        <a href="{% url 'update-room' room.id %}">Update</a>
+                        <a href="{% url 'delete-room' room.id %}">Delete</a>
                       </div>
+                      {% if room.room_video_call_id %}
+                      <a href="{% url 'stop-meeting' room.id %}" id="stopMeetingBtn" class="btn btn-danger dropdown-btn">Stop Meeting</a>
+
+                        <!-- <button id="stopMeetingBtn" class="btn btn-danger dropdown-btn">Stop Meeting</button> -->
+                        <a href="{% url 'join-meeting' room.id %}" id="joinMeetingBtn" class="btn btn-success dropdown-btn">Join Now</a>
+                      {% else %}
+                        <a href="{% url 'start-meeting' room.id %}" class="btn btn-primary dropdown-btn">Start Meeting</a>
+                      {% endif %}
                     </div>
                   </div>
-       </div>
+                </div>
+                {% else %}
+                <div class="room__topRight">
+                  {% if room.room_video_call_id %}
+                    <a href="{% url 'join-meeting' room.id %}" id="joinMeetingBtn" class="join">Join Now</a>
+                  {% else %}
+                    <button class="notlive" disabled>Meeting Not Live</button>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </div>
+              
+    
+          <div class="room__box scroll">
+            <div class="room__header scroll">
+              <div class="room__info">
+                <h3>{{room.name}}</h3>
+                <span>{{room.created|timesince}} ago</span>
+              </div>
+              <div class="room__hosted">
+                <p>Hosted By</p>
+                <a href="{% url 'user-profile' room.host.id %}" class="room__author">
+                  <div class="avatar avatar--small">
+                    <img src="{{room.host.avatar.url}}" />
+                  </div>
+                  <span>@{{room.host.username}}</span>
+                </a>
+              </div>
+               
+             
+              <span class="room__topics">{{room.topic}}</span>
+             </div>
+    
+                      <div class="room__conversation">
+                        <div class="threads scroll">
+                          <div id="chat-messages" style="max-height: 300px; overflow-y: scroll;">
+                            {% for message in room_messages %}
+                                <div class="thread">
+                                    <div class="thread__top">
+                                        <div class="thread__author">
+                                            <a href="{% url 'user-profile' message.user.id %}" class="thread__authorInfo">
+                                                <div class="avatar avatar--small">
+                                                    <img src="{{ message.user.avatar.url }}" />
+                                                </div>
+                                                <span>@{{ message.user.username }}</span>
+                                            </a>
+                                            <span class="thread__date">{{ message.created|timesince }} ago</span>
+                                        </div>
+    
+                                        {% if request.user == message.user %}
+                                        <a href="{% url 'delete-message' message.id %}">
+                                            <div class="thread__delete">
+                                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                                                    <title>remove</title>
+                                                    <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"></path>
+                                                </svg>
+                                            </div>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+    
+                                    <div class="thread__details">
+                                        {% if message.body %}
+                                        <p>{{ message.body }}</p>
+                                        {% elif message.file %}
+                                        <div class="file-message">
+                                            {% if message.is_image %}
+                                            <img src="{{ message.file.url }}" class="chat-image"/>
+                                            {% else %}
+                                            <a href="{{ message.file.url }}" download class="file-download">{{ message.filename }}</a>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                       {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+           </div>
+          </div>
+          
+        
 
       
-      
-        <div class="room__message" style="margin-bottom: 50px;">
-          <form id="file-upload-form" enctype="multipart/form-data" method="POST" action="{% url 'file-upload' room.name %}" onsubmit="return uploadFile(event);">
+          <div class="room__message">
+            <form id="file-upload-form" enctype="multipart/form-data" method="POST"
+                  action="{% url 'file-upload' room.name %}" onsubmit="return uploadFile(event);">
               {% csrf_token %}
-              <input type="file" name="file" id="id_file">
-              <button type="submit">Submit File</button>
-          </form>
-      </div>
-      
-      <div class="room__message" style="margin-top: 30px;">
-          <input class="input" type="text" placeholder="Write your message here..." id="chat-message-input" />
-          <button class="button is-info" id="chat-message-submit">Send</button>
-      </div>
+          
+              <!-- File input with icon label -->
+              <label for="id_file" class="upload-icon">
+                <i class="fa fa-paperclip"></i>
+              </label>
+              <input type="file" name="file" id="id_file" hidden />
+          
+              <!-- Message input -->
+              <input class="input" type="text" placeholder="Write your message here..." id="chat-message-input" />
+          
+              <!-- Submit button -->
+              <button id="chat-message-submit" type="button">
+                <i class="fa fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+          
+          <!-- Chat message list -->
+          <div id="chat-messages" style="margin-top: 20px;"></div>
+          
+          
     
       
       
@@ -136,13 +163,13 @@
 
     <!-- Participants Section -->
     <div class="participants">
-      <h3 class="participants__top">Participants <span>({{participants.count}} Joined)</span></h3>
+      <h3 class="participants__top">Participants <span style="color:white;">({{participants.count}} Joined)</span></h3>
       <div class="participants__list scroll">
         {% for user in participants %}
         <a href="{% url 'user-profile' user.id %}" class="participant">
           <div class="avatar avatar--medium">
             <img src="{{user.avatar.url}}" />
-            <!-- <span class="online-indicator {% if user.username in online_users %}active{% endif %}"></span> -->
+            <!-- <span class="online-indicator {% if user.username in online_users %}active{% endif %}"></span>  -->
 
           </div>
           <p>{{user.name}} <span>@{{user.username}}</span></p>
@@ -157,170 +184,142 @@
 {{ room.name|json_script:"json-roomname" }}
 {{ request.user.username|json_script:"json-username" }}
 <script>
- function scrollToBottom() {
+    const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
+    const userName = JSON.parse(document.getElementById('json-username').textContent);
+
+    const messageInput = document.getElementById('chat-message-input');
+    const fileInput = document.getElementById('id_file');
+    const sendButton = document.getElementById('chat-message-submit');
+    const fileUploadForm = document.getElementById('file-upload-form');
+
     const chatMessages = document.getElementById("chat-messages");
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+    const onlineCount = document.getElementById("online-count");
+    const onlineUsersList = document.getElementById("online-users-list");
 
-scrollToBottom();
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/' + roomName + '/');
 
-const messageInputDom = document.querySelector('#chat-message-input');
-const fileInputDom = document.querySelector('#id_file');
-const sendButton = document.querySelector('#chat-message-submit');
-const fileUploadForm = document.getElementById('file-upload-form');
-const onlineCountDom = document.getElementById("online-count"); // Display online count
-const onlineUsersList = document.getElementById("online-users-list"); // Display online users
-
-const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
-const userName = JSON.parse(document.getElementById('json-username').textContent);
-
-const chatSocket = new WebSocket(
-    'ws://' + window.location.host + '/ws/' + roomName + '/'
-);
-
-// Ensure only one input is used at a time
-messageInputDom.addEventListener("input", function () {
-    fileInputDom.disabled = messageInputDom.value.trim() !== "";
-});
-
-fileInputDom.addEventListener("change", function () {
-    messageInputDom.disabled = fileInputDom.files.length > 0;
-});
-
-// Handle file upload
-function uploadFile(event) {
-    event.preventDefault();
-
-    if (fileInputDom.files.length === 0) {
-        alert("Please select a file before submitting!");
-        return false;
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    const formData = new FormData(fileUploadForm);
+    function toggleSendButton() {
+        const hasText = messageInput.value.trim().length > 0;
+        const hasFile = fileInput.files.length > 0;
 
-    fetch(fileUploadForm.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
+        sendButton.disabled = !(hasText || hasFile);
+    }
+
+    // Initial state
+    toggleSendButton();
+
+    // Input event listeners
+    messageInput.addEventListener('input', () => {
+        fileInput.disabled = messageInput.value.trim().length > 0;
+        toggleSendButton();
+    });
+
+    fileInput.addEventListener('change', () => {
+        messageInput.disabled = fileInput.files.length > 0;
+        toggleSendButton();
+    });
+
+    // Send button click
+    sendButton.onclick = function () {
+        const message = messageInput.value.trim();
+        const hasFile = fileInput.files.length > 0;
+
+        // Send message if exists
+        if (message !== "") {
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'username': userName,
+                'room': roomName
+            }));
+            messageInput.value = "";
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.file_url) {
-            alert('File upload failed!');
-            return;
+
+        // Upload file if selected
+        if (hasFile) {
+            const formData = new FormData(fileUploadForm);
+
+            fetch(fileUploadForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.file_url) {
+                    alert('File upload failed!');
+                    return;
+                }
+                fileInput.value = "";
+                messageInput.disabled = false;
+            })
+            .catch(error => console.error('File upload error:', error));
         }
 
-        // No need to append manually, WebSocket will handle it
-        fileInputDom.value = "";
-        messageInputDom.disabled = false;
-    })
-    .catch(error => console.error('Error:', error));
+        // Re-enable button
+        toggleSendButton();
+        fileInput.disabled = false;
+    };
 
-    return false;
-}
+    // WebSocket message handler
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
 
-// Handle WebSocket messages
-chatSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    const chatMessages = document.querySelector('#chat-messages');
+        if (data.type === "online_users") {
+            onlineCount.innerText = `Online ${data.online_users.length - 1}`;
+            onlineUsersList.innerHTML = "";
+            data.online_users.forEach(user => {
+                const li = document.createElement("li");
+                li.innerText = user;
+                onlineUsersList.appendChild(li);
+            });
+            updateOnlineUsers(data.online_users);
+        } else if (data.message) {
+            chatMessages.innerHTML += `<b>${data.username}</b>: ${data.message}<br>`;
+        } else if (data.file_url) {
+            if (data.is_image) {
+                chatMessages.innerHTML += `<b>${data.username}</b>: <img src="${data.file_url}" style="max-width: 200px;" /><br>`;
+            } else {
+                chatMessages.innerHTML += `<b>${data.username}</b>: <a href="${data.file_url}" download>${data.filename}</a><br>`;
+            }
+        }
 
-    if (data.type === "online_users") {
-        // Update online user count
-        onlineCountDom.innerText = `Online Users: ${data.online_users.length-1}`;
+        scrollToBottom();
+    };
 
-        
-        // Update online users list
-        onlineUsersList.innerHTML = "";
-        data.online_users.forEach(user => {
-            const li = document.createElement("li");
-            li.innerText = user;
-            onlineUsersList.appendChild(li);
+    chatSocket.onclose = function () {
+        console.log('WebSocket closed unexpectedly');
+    };
+
+    function updateOnlineUsers(onlineUsers) {
+        const participants = document.querySelectorAll('.participant');
+
+        participants.forEach(participant => {
+            const username = participant.querySelector('span').textContent.replace('@', '').trim();
+            const avatar = participant.querySelector('.avatar');
+
+            if (onlineUsers.includes(username)) {
+                avatar.classList.add('active');
+            } else {
+                avatar.classList.remove('active');
+            }
         });
-        updateOnlineUsers(data.online_users);
-    }
-    else if (data.message) {
-        chatMessages.innerHTML += `<b>${data.username}</b>: ${data.message}<br>`;
-    }
-    else if (data.file_url) {
-        if (data.is_image) {
-            chatMessages.innerHTML += `<b>${data.username}</b>: <img src="${data.file_url}" style="max-width: 200px;" /><br>`;
-        } else {
-            chatMessages.innerHTML += `<b>${data.username}</b>: <a href="${data.file_url}" download>${data.filename}</a><br>`;
+
+        const hostElement = document.querySelector('.room__hosted .avatar');
+        const hostUsername = document.querySelector('.room__hosted span').textContent.replace('@', '').trim();
+
+        if (hostElement) {
+            hostElement.classList.toggle('active', onlineUsers.includes(hostUsername));
         }
     }
-
 
     scrollToBottom();
-};
+</script>
 
-chatSocket.onclose = function() {
-    console.log('The socket closed unexpectedly');
-};
-
-// Handle message sending
-sendButton.onclick = function() {
-    const message = messageInputDom.value.trim();
-
-    if (message === "") {
-        alert("Please enter a message before sending!");
-        return;
-    }
-
-    chatSocket.send(JSON.stringify({
-        'message': message,
-        'username': userName,
-        'room': roomName
-    }));
-
-
-
-
-    messageInputDom.value = "";
-    fileInputDom.disabled = false;
-};
-function updateOnlineUsers(onlineUsers) {
-    const participants = document.querySelectorAll('.participant');
-
-    participants.forEach(participant => {
-        const username = participant.querySelector('span').textContent.replace('@', '').trim();
-        const avatar = participant.querySelector('.avatar');
-
-        if (onlineUsers.includes(username)) {
-            avatar.classList.add('active');  // Add green dot if user is online
-        } else {
-            avatar.classList.remove('active');  // Remove green dot if user goes offline
-        }
-    });
-    const hostElement = document.querySelector('.room__hosted .avatar');
-    const hostUsername = document.querySelector('.room__hosted span').textContent.replace('@', '').trim();
-
-    if (hostElement && onlineUsers.includes(hostUsername)) {
-        hostElement.classList.add('active');
-    } else if (hostElement) {
-        hostElement.classList.remove('active');
-    }
-}
-
-
-document.getElementById("stopMeetingBtn")?.addEventListener("click", function () {
-    fetch("{% url 'stop-meeting' room.id %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Meeting has ended!");
-            window.location.href = "{% url 'room' room.id %}";  // Redirect to home page
-        }
-    });
-});
-
-  
-  </script>
   
 {% endblock content %}
